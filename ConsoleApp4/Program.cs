@@ -62,50 +62,63 @@ namespace ConsoleApp4
     class Pokeball
     {
         public bool IsOpen;
-        public Charmander EnclosedPokemon;
+        public List<Pokemon> EnclosedPokemons;
+
+        public Pokeball()
+        {
+            EnclosedPokemons = new List<Pokemon>();
+        }
 
         public void Throw()
         {
-            if (!IsOpen && EnclosedPokemon != null)
+            if (!IsOpen && EnclosedPokemons.Count > 0)
             {
-                Console.WriteLine("Pokeball is gegooid!");
+                Console.WriteLine("Pokeball is thrown!");
                 IsOpen = true;
-                ReleasePokemon(EnclosedPokemon);
+                ReleasePokemons();
             }
             else
             {
-                Console.WriteLine("Pokeball is leeg of al open.");
+                Console.WriteLine("Pokeball is empty or already open.");
             }
         }
 
-        private void ReleasePokemon(Charmander charmander)
+        private void ReleasePokemons()
         {
-            Console.WriteLine(charmander.name + ", ik kies jou!");
-            charmander.BattleCry();
+            foreach (Pokemon pokemon in EnclosedPokemons)
+            {
+                Console.WriteLine(pokemon.name + ", I choose you!");
+                pokemon.BattleCry();
+            }
         }
 
         public void Return()
         {
-            if (IsOpen && EnclosedPokemon != null)
+            if (IsOpen && EnclosedPokemons.Count > 0)
             {
-                Console.WriteLine(EnclosedPokemon.name + " kom terug!");
+                foreach (Pokemon pokemon in EnclosedPokemons)
+                {
+                    Console.WriteLine(pokemon.name + ", come back!");
+                }
+
+                EnclosedPokemons.Clear();
                 IsOpen = false;
             }
             else
             {
-                Console.WriteLine("Pokeball is al dicht of leeg.");
+                Console.WriteLine("Pokeball is already closed or empty.");
             }
         }
 
-        public void EnclosePokemon(Charmander charmander)
+        public void EnclosePokemon(Pokemon pokemon)
         {
-            if (!IsOpen && EnclosedPokemon == null)
+            if (!IsOpen)
             {
-                EnclosedPokemon = charmander;
+                EnclosedPokemons.Add(pokemon);
             }
             else
             {
-                Console.WriteLine("Kan pokemon niet vangen. Pokeball is al open of er zit al een pokemon in.");
+                Console.WriteLine("Cannot enclose a Pokemon. Pokeball is already open.");
             }
         }
     }
@@ -119,17 +132,28 @@ namespace ConsoleApp4
         {
             Name = name;
             Belt = new List<Pokeball>();
-            InitializeBeltWithCharmanders();
+            InitializeBeltWithPokemon();
         }
 
-        private void InitializeBeltWithCharmanders()
+        private void InitializeBeltWithPokemon()
         {
-            for (int i = 0; i <= 6; i++)
+            for (int i = 0; i < 2; i++)
             {
-                Charmander charmander = new Charmander("Charmander" + (i + 1), "Strength", "Weakness");
-                Pokeball pokeball = new Pokeball();
-                pokeball.EnclosePokemon(charmander);
-                Belt.Add(pokeball);
+                Squirtle squirtle = new Squirtle("Squirtle" + (i + 1));
+                Bulbasaur bulbasaur = new Bulbasaur("Bulbasaur" + (i + 1));
+                Charmander charmander = new Charmander("Charmander" + (i + 1));
+
+                Pokeball pokeball1 = new Pokeball();
+                pokeball1.EnclosePokemon(squirtle);
+                Belt.Add(pokeball1);
+
+                Pokeball pokeball2 = new Pokeball();
+                pokeball2.EnclosePokemon(bulbasaur);
+                Belt.Add(pokeball2);
+
+                Pokeball pokeball3 = new Pokeball();
+                pokeball3.EnclosePokemon(charmander);
+                Belt.Add(pokeball3);
             }
         }
 
@@ -142,7 +166,7 @@ namespace ConsoleApp4
             }
 
             Pokeball pokeball = Belt[index];
-            if (!pokeball.IsOpen && pokeball.EnclosedPokemon != null)
+            if (!pokeball.IsOpen && pokeball.EnclosedPokemons != null)
             {
                 Console.WriteLine("Trainer " + Name + " gooit een pokeball!");
                 pokeball.Throw();
@@ -153,17 +177,25 @@ namespace ConsoleApp4
         }
         public void ReturnPokemon()
         {
+            bool anyPokemonReturned = false;
+
             foreach (Pokeball pokeball in Belt)
             {
-                if (pokeball.IsOpen && pokeball.EnclosedPokemon != null)
+                if (pokeball.IsOpen && pokeball.EnclosedPokemons.Count > 0)
                 {
                     pokeball.Return();
-                    Console.WriteLine(pokeball.EnclosedPokemon.name + " gaat terug naar trainer " + Name + " zijn pokeball.");
-                    return;
+                    foreach (Pokemon pokemon in pokeball.EnclosedPokemons)
+                    {
+                        Console.WriteLine(pokemon.name + " goes back to Trainer " + Name + "'s pokeball.");
+                    }
+                    anyPokemonReturned = true;
                 }
             }
 
-            Console.WriteLine("Er is geen open pokeball om terug te geven.");
+            if (!anyPokemonReturned)
+            {
+                Console.WriteLine("There is no open pokeball to return.");
+            }
         }
     }
 
